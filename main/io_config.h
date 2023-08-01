@@ -1,0 +1,10 @@
+#define GPIO_SDA 5
+#define GPIO_SCL 7
+#define GPIO_MPU_INT 5
+#define GPIO_LED_IO1 10
+#define GPIO_LED_IO2 11
+#define GPIO_LED_PWR 18
+#define GPIO_CAN_TX 2
+#define GPIO_CAN_RX 3
+#define GPIO_KEY_0 0
+#define GPIO_KEY_1 1
