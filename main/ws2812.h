@@ -11,6 +11,8 @@ void ws2812_power_on();
 
 void ws2812_power_off();
 
+void ws2812_power_toggle();
+
 void ws2812_deinit(void);
 
 #endif //ESP32C6_HELLO_WS2812_H

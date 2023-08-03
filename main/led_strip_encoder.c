@@ -1,9 +1,3 @@
-/*
- * SPDX-FileCopyrightText: 2021-2022 Espressif Systems (Shanghai) CO LTD
- *
- * SPDX-License-Identifier: Apache-2.0
- */
-
 #include "esp_check.h"
 #include "led_strip_encoder.h"
 
@@ -16,6 +10,12 @@ typedef struct {
     int state;
     rmt_symbol_word_t reset_code;
 } rmt_led_strip_encoder_t;
+
+#define T0H_TIME_US  0.3
+#define T0L_TIME_US  0.9
+#define T1H_TIME_US  0.9
+#define T1L_TIME_US  0.3
+#define RES_TIME_US  100
 
 static size_t
 rmt_encode_led_strip(rmt_encoder_t *encoder, rmt_channel_handle_t channel, const void *primary_data, size_t data_size,
@@ -83,15 +83,15 @@ esp_err_t rmt_new_led_strip_encoder(const led_strip_encoder_config_t *config, rm
     rmt_bytes_encoder_config_t bytes_encoder_config = {
             .bit0 = {
                     .level0 = 1,
-                    .duration0 = 0.3 * config->resolution / 1000000, // T0H=0.3us
+                    .duration0 = T0H_TIME_US * config->resolution / 1000000, // T0H
                     .level1 = 0,
-                    .duration1 = 0.9 * config->resolution / 1000000, // T0L=0.9us
+                    .duration1 = T0L_TIME_US * config->resolution / 1000000, // T0L
             },
             .bit1 = {
                     .level0 = 1,
-                    .duration0 = 0.9 * config->resolution / 1000000, // T1H=0.9us
+                    .duration0 = T1H_TIME_US * config->resolution / 1000000, // T1H
                     .level1 = 0,
-                    .duration1 = 0.3 * config->resolution / 1000000, // T1L=0.3us
+                    .duration1 = T1L_TIME_US * config->resolution / 1000000, // T1L
             },
             .flags.msb_first = 1 // WS2812 transfer bit order: G7...G0R7...R0B7...B0
     };
@@ -101,7 +101,8 @@ esp_err_t rmt_new_led_strip_encoder(const led_strip_encoder_config_t *config, rm
     ESP_GOTO_ON_ERROR(rmt_new_copy_encoder(&copy_encoder_config, &led_encoder->copy_encoder), err, TAG,
                       "create copy encoder failed");
 
-    uint32_t reset_ticks = config->resolution / 1000000 * 50 / 2; // reset code duration defaults to 50us
+    // 300us reset time
+    uint32_t reset_ticks = config->resolution / 1000000 * RES_TIME_US / 2;
     led_encoder->reset_code = (rmt_symbol_word_t) {
             .level0 = 0,
             .duration0 = reset_ticks,

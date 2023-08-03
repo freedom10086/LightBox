@@ -110,13 +110,10 @@ static esp_err_t i2c_master_init(void) {
                               0);
 }
 
-/**
- * @brief Read a sequence of bytes from a MPU9250 sensor registers
- */
-static esp_err_t i2c_read(uint16_t reg_addr, uint8_t *data, size_t len) {
-    uint8_t u8_reg_addr[] = {reg_addr >> 8, reg_addr & 0xff};
+static esp_err_t i2c_read(uint8_t reg_addr, uint8_t *data, size_t len) {
+    uint8_t u8_reg_addr[] = {reg_addr};
     esp_err_t err = i2c_master_write_read_device(I2C_MASTER_NUM, MPU_ADDR,
-                                                 u8_reg_addr, 2, data, len,
+                                                 u8_reg_addr, sizeof(u8_reg_addr), data, len,
                                                  I2C_MASTER_TIMEOUT_MS / portTICK_PERIOD_MS);
     if (err != ESP_OK) {
         ESP_LOGE(TAG, "read i2c failed, for dev:%x addr:%x,  %s", MPU_ADDR, reg_addr, esp_err_to_name(err));
@@ -124,19 +121,7 @@ static esp_err_t i2c_read(uint16_t reg_addr, uint8_t *data, size_t len) {
     return err;
 }
 
-static esp_err_t i2c_write_cmd(uint16_t reg_addr) {
-    int ret;
-    uint8_t u8_reg_addr[] = {reg_addr >> 8, reg_addr & 0xff};
-    ret = i2c_master_write_to_device(I2C_MASTER_NUM, MPU_ADDR,
-                                     u8_reg_addr, 2,
-                                     I2C_MASTER_TIMEOUT_MS / portTICK_PERIOD_MS);
-    if (ret != ESP_OK) {
-        ESP_LOGE(TAG, "write i2c cmd failed, for addr %x,  %s", reg_addr, esp_err_to_name(ret));
-    }
-    return ret;
-}
-
-static esp_err_t i2c_write_data(uint16_t reg_addr, uint8_t data) {
+static esp_err_t i2c_write_data(uint8_t reg_addr, uint8_t data) {
     int ret;
     uint8_t write_buf[2] = {reg_addr, data};
     ret = i2c_master_write_to_device(I2C_MASTER_NUM, MPU_ADDR,
@@ -200,32 +185,54 @@ static float get_accel_res() {
     assert(0);
 }
 
-void read_accel(int16_t *acc_x, int16_t *acc_y, int16_t *acc_z) {
+void mpu_read_accel_raw(int16_t *acc_x, int16_t *acc_y, int16_t *acc_z) {
     i2c_read(MPU_REG_ADDR_ACCEL_XOUT_H, accel_buf, 6);
     *acc_x = (int16_t) ((accel_buf[0] << 8) | accel_buf[1]);
     *acc_y = (int16_t) ((accel_buf[2] << 8) | accel_buf[3]);
     *acc_z = (int16_t) ((accel_buf[4] << 8) | accel_buf[5]);
 }
 
-void read_gyro(int16_t *g_x, int16_t *g_y, int16_t *g_z) {
+void mpu_read_gyro_raw(int16_t *g_x, int16_t *g_y, int16_t *g_z) {
     i2c_read(MPU_REG_ADDR_GYRO_XOUT_H, gyro_buf, 6);
     *g_x = (int16_t) ((gyro_buf[0] << 8) | gyro_buf[1]);
     *g_y = (int16_t) ((gyro_buf[2] << 8) | gyro_buf[3]);
     *g_z = (int16_t) ((gyro_buf[4] << 8) | gyro_buf[5]);
 }
 
-int16_t mpu_read_temperature() {
-    i2c_read(MPU_REG_ADDR_TEMP_OUT_H, temp_buf, 2);
-    return ((int16_t) temp_buf[0]) << 8 | temp_buf[1];
+void mpu_read_accel(float *acc_x, float *acc_y, float *acc_z) {
+    int16_t acc_x_raw, acc_y_raw, acc_z_raw;
+    mpu_read_accel_raw(&acc_x_raw, &acc_y_raw, &acc_z_raw);
+    float acc_res = get_accel_res();
+    *acc_x = (float)acc_x_raw * acc_res;
+    *acc_y = (float)acc_y_raw * acc_res;
+    *acc_z = (float)acc_z_raw * acc_res;
 }
 
-void mpu_calibrate(float *dest1, float *dest2) {
+void mpu_read_gyro(float *g_x, float *g_y, float *g_z) {
+    int16_t g_x_raw, g_y_raw, g_z_raw;
+    mpu_read_gyro_raw(&g_x_raw, &g_y_raw, &g_z_raw);
+    float g_res = get_gyro_res();
+    *g_x = (float)g_x_raw * g_res;
+    *g_y = (float)g_y_raw * g_res;
+    *g_z = (float)g_z_raw * g_res;
+}
+
+float mpu_read_temperature() {
+    i2c_read(MPU_REG_ADDR_TEMP_OUT_H, temp_buf, 2);
+    int16_t temp_raw =  ((int16_t) temp_buf[0]) << 8 | temp_buf[1];
+    // ESP_LOGI(TAG, "temp[0] %d temp[1] %d temp %d", temp_buf[0], temp_buf[1], temp_raw);
+    return ((float) (temp_raw / 340)) + 36.53f;
+}
+
+void mpu_calibrate(float *gyro_bias_dest, float *accel_bias_dest) {
+    ESP_LOGI(TAG, "mpu start calibrate");
+
     uint8_t data[12]; // data array to hold accelerometer and gyro x, y, z, data
     uint16_t ii, packet_count, fifo_count;
     int32_t gyro_bias[3] = {0, 0, 0}, accel_bias[3] = {0, 0, 0};
 
     // reset device, reset all registers, clear gyro and accelerometer bias registers
-    i2c_write_data(MPU_REG_ADDR_PWR_MGMT_1, 0x80); // Write a one to bit 7 reset bit; toggle reset device
+    mpu_reset();
     vTaskDelay(pdMS_TO_TICKS(100));
 
     // get stable time source
@@ -315,10 +322,10 @@ void mpu_calibrate(float *dest1, float *dest2) {
     i2c_write_data(MPU_REG_ADDR_ZG_OFFS_USRH, data[4]);
     i2c_write_data(MPU_REG_ADDR_ZG_OFFS_USRL, data[5]);
 
-    dest1[0] =
-            (float) gyro_bias[0] / (float) gyrosensitivity; // construct gyro bias in deg/s for later manual subtraction
-    dest1[1] = (float) gyro_bias[1] / (float) gyrosensitivity;
-    dest1[2] = (float) gyro_bias[2] / (float) gyrosensitivity;
+    // construct gyro bias in deg/s for later manual subtraction
+    gyro_bias_dest[0] = (float) gyro_bias[0] / (float) gyrosensitivity;
+    gyro_bias_dest[1] = (float) gyro_bias[1] / (float) gyrosensitivity;
+    gyro_bias_dest[2] = (float) gyro_bias[2] / (float) gyrosensitivity;
 
     // Construct the accelerometer biases for push to the hardware accelerometer bias registers. These registers contain
     // factory trim values which must be added to the calculated accelerometer biases; on boot up these registers will hold
@@ -370,14 +377,20 @@ void mpu_calibrate(float *dest1, float *dest2) {
     i2c_write_data(MPU_REG_ADDR_ZA_OFFSET_L_TC, data[5]);
 
     // Output scaled accelerometer biases for manual subtraction in the main program
-    dest2[0] = (float) accel_bias[0] / (float) accelsensitivity;
-    dest2[1] = (float) accel_bias[1] / (float) accelsensitivity;
-    dest2[2] = (float) accel_bias[2] / (float) accelsensitivity;
+    accel_bias_dest[0] = (float) accel_bias[0] / (float) accelsensitivity;
+    accel_bias_dest[1] = (float) accel_bias[1] / (float) accelsensitivity;
+    accel_bias_dest[2] = (float) accel_bias[2] / (float) accelsensitivity;
+
+    ESP_LOGI(TAG, "mpu calibrate done. gyro bias: x:%.2f y:%.2f z:%.2f accel bias: x:%.2f y:%.2f z:%.2f",
+             gyro_bias_dest[0], gyro_bias_dest[1], gyro_bias_dest[2],
+             accel_bias_dest[0], accel_bias_dest[1], accel_bias_dest[2]);
 }
 
 // Accelerometer and gyroscope self test; check calibration wrt factory settings
 // Should return percent deviation from factory trim values, +/- 14 or less deviation is a pass
 void mpu_self_test(float *destination) {
+    ESP_LOGI(TAG, "mpu start self test");
+
     uint8_t rawData[4];
     uint8_t selfTest[6];
     float factoryTrim[6];
@@ -392,11 +405,11 @@ void mpu_self_test(float *destination) {
     i2c_read(MPU_REG_ADDR_SELF_TEST_Y, &rawData[1], 1); // Y-axis self-test results
     i2c_read(MPU_REG_ADDR_SELF_TEST_Z, &rawData[2], 1); // Z-axis self-test results
     i2c_read(MPU_REG_ADDR_SELF_TEST_A, &rawData[3], 1); // Mixed-axis self-test results
-    // Extract the acceleration test results first
+    // Extract the acceleration test results
     selfTest[0] = (rawData[0] >> 3) | (rawData[3] & 0x30) >> 4; // XA_TEST result is a five-bit unsigned integer
     selfTest[1] = (rawData[1] >> 3) | (rawData[3] & 0x0C) >> 2; // YA_TEST result is a five-bit unsigned integer
     selfTest[2] = (rawData[2] >> 3) | (rawData[3] & 0x03); // ZA_TEST result is a five-bit unsigned integer
-    // Extract the gyration test results first
+    // Extract the gyration test results
     selfTest[3] = rawData[0] & 0x1F; // XG_TEST result is a five-bit unsigned integer
     selfTest[4] = rawData[1] & 0x1F; // YG_TEST result is a five-bit unsigned integer
     selfTest[5] = rawData[2] & 0x1F; // ZG_TEST result is a five-bit unsigned integer
@@ -423,25 +436,55 @@ void mpu_self_test(float *destination) {
     // Report results as a ratio of (STR - FT)/FT; the change from Factory Trim of the Self-Test Response
     // To get to percent, must multiply by 100 and subtract result from 100
     for (int i = 0; i < 6; i++) {
-        destination[i] =
-                100.0 + 100.0 * ((float) selfTest[i] - factoryTrim[i]) / factoryTrim[i]; // Report percent differences
+        destination[i] = 100.0 + 100.0 * ((float) selfTest[i] - factoryTrim[i]) / factoryTrim[i];
+        // Report percent differences
     }
+
+    ESP_LOGI(TAG, "self test deviation %.2f %.2f %.2f %.2f %.2f %.2f",
+             destination[0], destination[1], destination[2],
+             destination[3], destination[4], destination[5]);
 }
 
-void mpu_init() {
+esp_err_t mpu_init() {
     esp_err_t iic_err = i2c_master_init();
     if (iic_err != ESP_OK) {
         ESP_LOGE(TAG, "I2C initialized failed %d %s", iic_err, esp_err_to_name(iic_err));
-        return;
+        return iic_err;;
     }
     ESP_LOGI(TAG, "I2C initialized successfully");
 
+    // who am i
+    uint8_t data;
+    i2c_read(MPU_REG_ADDR_WHO_AM_I, &data, 1);
+    if (data == MPU_ADDR) {
+        ESP_LOGI(TAG, "mpu 6050 check success");
+    } else {
+        ESP_LOGE(TAG, "not mpu 6050 who am i %x", data);
+        return ESP_FAIL;
+    }
+
+    mpu_reset();
+
+    ESP_LOGI(TAG, "Configure MPU INT gpio");
+    gpio_config_t io_config = {
+            .pin_bit_mask = (1ull << GPIO_MPU_INT),
+            .mode = GPIO_MODE_INPUT,
+            .pull_up_en = 0,
+            .pull_down_en = 0,
+    };
+    ESP_ERROR_CHECK(gpio_config(&io_config));
+
+    return ESP_OK;
+}
+
+void mpu_prepare() {
     // wake up device-don't need this here if using calibration function below
     //  writeByte(MPU6050_ADDRESS, PWR_MGMT_1, 0x00); // Clear sleep mode bit (6), enable all sensors
     //  delay(100); // Delay 100 ms for PLL to get established on x-axis gyro; should check for PLL ready interrupt
 
-    // get stable time source
-    i2c_write_data(MPU_REG_ADDR_PWR_MGMT_1, 0x01);  // Set clock source to be PLL with x-axis gyroscope reference, bits 2:0 = 001
+    uint8_t data;
+    // Set clock source to be PLL with x-axis gyroscope reference, bits 2:0 = 001
+    i2c_write_data(MPU_REG_ADDR_PWR_MGMT_1, 0x01);
 
     // Configure Gyro and Accelerometer
     // Disable FSYNC and set accelerometer and gyro bandwidth to 44 and 42 Hz, respectively;
@@ -454,23 +497,33 @@ void mpu_init() {
 
     // Set gyroscope full scale range
     // Range selects FS_SEL and AFS_SEL are 0 - 3, so 2-bit values are left-shifted into positions 4:3
-    uint8_t c;
-    i2c_read(MPU_REG_ADDR_GYRO_CONFIG, &c, 1);
-    i2c_write_data(MPU_REG_ADDR_GYRO_CONFIG, c & ~0xE0); // Clear self-test bits [7:5]
-    i2c_write_data(MPU_REG_ADDR_GYRO_CONFIG, c & ~0x18); // Clear AFS bits [4:3]
-    i2c_write_data(MPU_REG_ADDR_GYRO_CONFIG, c | gyro_scale << 3); // Set full scale range for the gyro
+    i2c_read(MPU_REG_ADDR_GYRO_CONFIG, &data, 1);
+    i2c_write_data(MPU_REG_ADDR_GYRO_CONFIG, data & ~0xE0); // Clear self-test bits [7:5]
+    i2c_write_data(MPU_REG_ADDR_GYRO_CONFIG, data & ~0x18); // Clear AFS bits [4:3]
+    i2c_write_data(MPU_REG_ADDR_GYRO_CONFIG, data | gyro_scale << 3); // Set full scale range for the gyro
 
     // Set accelerometer configuration
-    i2c_read(MPU_REG_ADDR_ACCEL_CONFIG, &c, 1);
-    i2c_write_data(MPU_REG_ADDR_ACCEL_CONFIG, c & ~0xE0); // Clear self-test bits [7:5]
-    i2c_write_data(MPU_REG_ADDR_ACCEL_CONFIG, c & ~0x18); // Clear AFS bits [4:3]
-    i2c_write_data(MPU_REG_ADDR_ACCEL_CONFIG, c | accel_scale << 3); // Set full scale range for the accelerometer
+    i2c_read(MPU_REG_ADDR_ACCEL_CONFIG, &data, 1);
+    i2c_write_data(MPU_REG_ADDR_ACCEL_CONFIG, data & ~0xE0); // Clear self-test bits [7:5]
+    i2c_write_data(MPU_REG_ADDR_ACCEL_CONFIG, data & ~0x18); // Clear AFS bits [4:3]
+    i2c_write_data(MPU_REG_ADDR_ACCEL_CONFIG, data | accel_scale << 3); // Set full scale range for the accelerometer
 
     // Configure Interrupts and Bypass Enable
-    // Set interrupt pin active high, push-pull, and clear on read of INT_STATUS, enable I2C_BYPASS_EN so additional chips
-    // can join the I2C bus and all can be controlled by the Arduino as master
-    i2c_write_data(MPU_REG_ADDR_INT_PIN_CFG, 0x22);
-    i2c_write_data(MPU_REG_ADDR_INT_ENABLE, 0x01);  // Enable data ready (bit 0) interrupt
+    // Set interrupt pin active high, push-pull, and clear on read of INT_STATUS, enable I2C_BYPASS_EN
+    // INT_LEVEL    INT_OPEN            LATCH_INT_EN    INT_RD_CLEAR
+    // 0(高电平)     0(pull push, 1开漏)  1               0(读取的时候清空)
+    // FSYNC_INT_LEVEL  FSYNC_INT_EN    I2C_BYPASS_EN   -
+    // 0                0               1               0
+    i2c_write_data(MPU_REG_ADDR_INT_PIN_CFG, 0b00100010);
+    // Enable data ready (bit 0) interrupt
+    i2c_write_data(MPU_REG_ADDR_INT_ENABLE, 0x01);
+    ESP_LOGI(TAG, "mpu 6050 init success");
+}
+
+bool mpu_data_int_ready() {
+    uint8_t data;
+    i2c_read(MPU_REG_ADDR_INT_STATUS, &data, 1);
+    return data & 0x01;
 }
 
 void mpu_reset() {
@@ -478,11 +531,12 @@ void mpu_reset() {
     i2c_write_data(MPU_REG_ADDR_PWR_MGMT_1, data);
     ESP_LOGI(TAG, "reset mpu");
     // wait reset done
-    while (data >> 7 & 0x01) {
-        ESP_LOGI(TAG, "wait reset done");
-        vTaskDelay(pdMS_TO_TICKS(5));
+    do {
+        vTaskDelay(pdMS_TO_TICKS(10));
         i2c_read(MPU_REG_ADDR_PWR_MGMT_1, &data, 1);
-    }
+        ESP_LOGI(TAG, "wait reset done");
+    } while (data >> 7 & 0x01);
+
     ESP_LOGI(TAG, "reset mpu done");
 }
 

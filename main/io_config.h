@@ -1,4 +1,4 @@
-#define GPIO_SDA 5
+#define GPIO_SDA 6
 #define GPIO_SCL 7
 #define GPIO_MPU_INT 5
 #define GPIO_LED_IO1 10
