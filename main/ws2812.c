@@ -97,26 +97,73 @@ static void led_task_entry(void *arg) {
             // Build RGB pixels
             // 色相（Hue，简H），饱和度（Saturation，简S）和亮度（Value，简V）
             //led_strip_hsv2rgb(hue, 100, 20, &red, &green, &blue);
-            led_strip_pixels1[i * 3 + 0] = 0;
-            led_strip_pixels1[i * 3 + 1] = 0;
-            led_strip_pixels1[i * 3 + 2] = 0;
 
-            led_strip_pixels2[i * 3 + 0] = 0;
-            led_strip_pixels2[i * 3 + 1] = 0;
-            led_strip_pixels2[i * 3 + 2] = 0;
+            if (i % 6 == 0) {
+                led_strip_pixels1[i * 3 + 0] = 0;
+                led_strip_pixels1[i * 3 + 1] = 0;
+                led_strip_pixels1[i * 3 + 2] = 33;
+            } else if (i % 6 == 1) {
+                led_strip_pixels1[i * 3 + 0] = 0;
+                led_strip_pixels1[i * 3 + 1] = 0;
+                led_strip_pixels1[i * 3 + 2] = 0;
+            } else if (i % 6 == 2) {
+                led_strip_pixels1[i * 3 + 0] = 33;
+                led_strip_pixels1[i * 3 + 1] = 0;
+                led_strip_pixels1[i * 3 + 2] = 0;
+            }  else if (i % 6 == 3) {
+                led_strip_pixels1[i * 3 + 0] = 0;
+                led_strip_pixels1[i * 3 + 1] = 0;
+                led_strip_pixels1[i * 3 + 2] = 0;
+            }  else if (i % 6 == 4) {
+                led_strip_pixels1[i * 3 + 0] = 0;
+                led_strip_pixels1[i * 3 + 1] = 33;
+                led_strip_pixels1[i * 3 + 2] = 0;
+            }  else if (i % 6 == 5) {
+                led_strip_pixels1[i * 3 + 0] = 0;
+                led_strip_pixels1[i * 3 + 1] = 0;
+                led_strip_pixels1[i * 3 + 2] = 0;
+            }
+
+            if (i % 6 == 0) {
+                led_strip_pixels2[i * 3 + 0] = 0;
+                led_strip_pixels2[i * 3 + 1] = 0;
+                led_strip_pixels2[i * 3 + 2] = 200;
+            } else if (i % 6 == 1) {
+                led_strip_pixels2[i * 3 + 0] = 0;
+                led_strip_pixels2[i * 3 + 1] = 0;
+                led_strip_pixels2[i * 3 + 2] = 0;
+            } else if (i % 6 == 2) {
+                led_strip_pixels2[i * 3 + 0] = 200;
+                led_strip_pixels2[i * 3 + 1] = 0;
+                led_strip_pixels2[i * 3 + 2] = 0;
+            }  else if (i % 6 == 3) {
+                led_strip_pixels2[i * 3 + 0] = 0;
+                led_strip_pixels2[i * 3 + 1] = 0;
+                led_strip_pixels2[i * 3 + 2] = 0;
+            }  else if (i % 6 == 4) {
+                led_strip_pixels2[i * 3 + 0] = 0;
+                led_strip_pixels2[i * 3 + 1] = 200;
+                led_strip_pixels2[i * 3 + 2] = 0;
+            }  else if (i % 6 == 5) {
+                led_strip_pixels2[i * 3 + 0] = 0;
+                led_strip_pixels2[i * 3 + 1] = 0;
+                led_strip_pixels2[i * 3 + 2] = 0;
+            }
         }
 
         // Flush RGB values to LEDs
         ESP_ERROR_CHECK(rmt_transmit(led_chan1, led_encoder,
                                      led_strip_pixels1, sizeof(led_strip_pixels1), &tx_config));
+        ESP_ERROR_CHECK(rmt_tx_wait_all_done(led_chan1, portMAX_DELAY));
+
         ESP_ERROR_CHECK(rmt_transmit(led_chan2, led_encoder,
                                      led_strip_pixels2, sizeof(led_strip_pixels2), &tx_config));
-
-        ESP_ERROR_CHECK(rmt_tx_wait_all_done(led_chan1, portMAX_DELAY));
         ESP_ERROR_CHECK(rmt_tx_wait_all_done(led_chan2, portMAX_DELAY));
 
+        ESP_LOGI(TAG, "LED draw");
+
         vTaskDelay(pdMS_TO_TICKS(CHASE_SPEED_MS));
-        vTaskDelay(pdMS_TO_TICKS(1000));
+        vTaskDelay(pdMS_TO_TICKS(2000));
         start_rgb += 60;
     }
 
