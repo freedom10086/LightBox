@@ -483,6 +483,20 @@ CONFIG_PARTITION_TABLE_MD5=y
 # end of Partition Table
 
 #
+# My Project Config
+#
+
+#
+# WIFI Config
+#
+CONFIG_WIFI_SSID="smart_led_box"
+CONFIG_WIFI_PASSWORD="12345678"
+CONFIG_WIFI_CHANNEL=1
+CONFIG_MAX_STA_CONN=2
+# end of WIFI Config
+# end of My Project Config
+
+#
 # Compiler options
 #
 CONFIG_COMPILER_OPTIMIZATION_DEBUG=y

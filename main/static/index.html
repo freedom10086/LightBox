@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Change Color</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <style>
+        html {
+            box-sizing: border-box;
+            -webkit-text-size-adjust: 100%;
+            -webkit-tap-highlight-gridor: transparent;
+            font-size: 15px;
+            height: 100%;
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: inherit;
+        }
+
+        .box {
+            border: burlywood 1px solid;
+            border-radius: 2px;
+            background: #00ffe1;
+            display: flex;
+            flex-direction: column;
+            padding: 5px 5px;
+            width: 360px;
+            height: 360px;
+            margin: 8px 8px;
+        }
+
+        .row {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: nowrap;
+            flex-grow: 1;
+        }
+
+        .grid {
+            margin: 2px 2px;
+            background: #000000;
+            flex-grow: 1;
+            cursor: pointer;
+            border: transparent 1px solid;
+        }
+
+        .grid:hover {
+            border: purple 1px solid;
+        }
+    </style>
+</head>
+<body>
+<div class="box">
+    <div class="row">
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+    </div>
+    <div class="row">
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+    </div>
+    <div class="row">
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+    </div>
+    <div class="row">
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+    </div>
+    <div class="row">
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+    </div>
+    <div class="row">
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+    </div>
+    <div class="row">
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+    </div>
+    <div class="row">
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+    </div>
+    <div class="row">
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+    </div>
+    <div class="row">
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+    </div>
+    <div class="row">
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+    </div>
+    <div class="row">
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+    </div>
+    <div class="row">
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+    </div>
+    <div class="row">
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+    </div>
+    <div class="row">
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+    </div>
+    <div class="row">
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+        <div class="grid"></div>
+    </div>
+</div>
+</body>
+<button onclick="clearAll()">清除</button>
+<button onclick="genResult()">生成</button>
+<div>
+    <label for="color-mode-select">颜色：</label>
+    <select id="color-mode-select">
+        <option value="single" selected="selected">单色</option>
+        <option value="multi">彩色</option>
+    </select>
+</div>
+<div id="color-mode-single" style="display: block">
+    <label for="color-picker-single">选择颜色：</label>
+    <input id="color-picker-single" value="#FF0000" type="color">
+</div>
+<div id="color-mode-multi" style="display: none">
+    <label for="color-picker-multi">选择颜色：</label>
+    <input id="color-picker-multi" value="#FF0000" type="color">
+</div>
+<script>
+
+    let lastSelectX = -1;
+    let lastSelectY = -1;
+    let currentColor = 'red';
+
+    function clearAll() {
+        document.querySelectorAll(".grid").forEach(item => {
+            item.style.background = '#000000';
+        })
+    }
+
+    let resultMap = [
+        0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0
+    ];
+
+    function genResult() {
+        let box = document.querySelector(".box");
+        let rows = box.querySelectorAll(".row");
+        for (let i = 0; i < rows.length; i++) {
+            let row = rows.item(i);
+            let items = row.querySelectorAll(".grid");
+            for (let j = 0; j < items.length; j++) {
+                let item = items.item(j);
+                // console.log(item.style.backgroundColor);
+                // let bgColor = window.getComputedStyle(item)['background-color'];
+                if (item.style.backgroundColor.length > 0
+                    && item.style.backgroundColor !== 'rgb(0, 0, 0)'
+                    && item.style.backgroundColor !== '#000000') {
+                    let xindex = j;
+                    let yindex = i;
+                    console.log("x:" + xindex + " , y:" + yindex);
+                    resultMap[yindex * (16 / 8) + ((xindex > 7) ? 1 : 0)] |= (0x80 >> (xindex % 8));
+                }
+            }
+        }
+
+        console.log(resultMap);
+    }
+
+    document.querySelectorAll(".grid").forEach(item => {
+        item.addEventListener("click", function (e) {
+            e.target.style.backgroundColor = currentColor;
+            let x = getElementIndex(e.target);
+            let y = getElementIndex(e.target.parentNode);
+            // console.log("click x:" + x + ", y:" + y);
+            lastSelectX = x;
+            lastSelectY = y;
+        })
+    });
+
+    document.querySelectorAll("select[id='color-mode-select']").forEach((select, index) => {
+        select.addEventListener('change', (e) => {
+            console.log("result select change", e.target.value);
+            if (e.target.value === 'single') {
+                document.querySelector("#color-mode-single").style.display = 'block';
+                document.querySelector("#color-mode-multi").style.display = 'none';
+            } else {
+                document.querySelector("#color-mode-single").style.display = 'none';
+                document.querySelector("#color-mode-multi").style.display = 'block';
+            }
+        })
+    });
+
+    document.querySelector("#color-picker-single").addEventListener('change', (e) => {
+        console.log("color change", e.target.value);
+        if (getCurrentColorMode() === 'single') {
+            currentColor = e.target.value;
+            document.querySelectorAll(".grid").forEach(item => {
+                if (item.style.backgroundColor.length > 0
+                    && item.style.backgroundColor !== 'rgb(0, 0, 0)'
+                    && item.style.backgroundColor !== '#000000') {
+                    item.style.backgroundColor = currentColor;
+                }
+            });
+        }
+    });
+
+    document.querySelector("#color-picker-multi").addEventListener('change', (e) => {
+        console.log("color change", e.target.value);
+        if (getCurrentColorMode() === 'multi') {
+            currentColor = e.target.value;
+        }
+    });
+
+    function getCurrentColorMode() {
+        return document.querySelector("select[id='color-mode-select']").value;
+    }
+
+    function getElementIndex(element) {
+        return Array.from(element.parentNode.children).indexOf(element);
+    }
+
+    function getNodeIndex(element) {
+        return Array.from(element.parentNode.childNodes).indexOf(element);
+    }
+</script>
+</html>

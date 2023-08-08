@@ -1,5 +1,5 @@
 #include "esp_check.h"
-#include "led_strip_encoder.h"
+#include "ws2812_encoder.h"
 
 static const char *TAG = "led_encoder";
 
@@ -101,7 +101,6 @@ esp_err_t rmt_new_led_strip_encoder(const led_strip_encoder_config_t *config, rm
     ESP_GOTO_ON_ERROR(rmt_new_copy_encoder(&copy_encoder_config, &led_encoder->copy_encoder), err, TAG,
                       "create copy encoder failed");
 
-    // 300us reset time
     uint32_t reset_ticks = config->resolution / 1000000 * RES_TIME_US / 2;
     led_encoder->reset_code = (rmt_symbol_word_t) {
             .level0 = 0,
