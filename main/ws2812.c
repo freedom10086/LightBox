@@ -157,26 +157,21 @@ void ws2812_init(void) {
     ESP_ERROR_CHECK(gpio_config(&io_config));
     ws2812_power_off();
 
-    rmt_tx_channel_config_t tx_chan_config1 = {
+    rmt_tx_channel_config_t tx_chan_config = {
             .clk_src = RMT_CLK_SRC_DEFAULT, // select source clock
             .gpio_num = GPIO_LED_IO1,
             .mem_block_symbols = 48, // increase the block size can make the LED less flickering
             .resolution_hz = RMT_LED_STRIP_RESOLUTION_HZ,
             .trans_queue_depth = 4, // set the number of transactions that can be pending in the background
+            .flags.with_dma = true,
     };
 
     ESP_LOGI(TAG, "Create RMT TX channel1");
-    ESP_ERROR_CHECK(rmt_new_tx_channel(&tx_chan_config1, &led_chan1));
+    ESP_ERROR_CHECK(rmt_new_tx_channel(&tx_chan_config, &led_chan1));
 
-    rmt_tx_channel_config_t tx_chan_config2 = {
-            .clk_src = RMT_CLK_SRC_DEFAULT, // select source clock
-            .gpio_num = GPIO_LED_IO2,
-            .mem_block_symbols = 48, // increase the block size can make the LED less flickering
-            .resolution_hz = RMT_LED_STRIP_RESOLUTION_HZ,
-            .trans_queue_depth = 4, // set the number of transactions that can be pending in the background
-    };
+    tx_chan_config.gpio_num = GPIO_LED_IO2;
     ESP_LOGI(TAG, "Create RMT TX channel2");
-    ESP_ERROR_CHECK(rmt_new_tx_channel(&tx_chan_config2, &led_chan2));
+    ESP_ERROR_CHECK(rmt_new_tx_channel(&tx_chan_config, &led_chan2));
 
     ESP_LOGI(TAG, "Install led strip encoder");
     led_strip_encoder_config_t encoder_config = {

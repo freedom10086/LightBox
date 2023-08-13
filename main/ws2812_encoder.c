@@ -15,7 +15,7 @@ typedef struct {
 #define T0L_TIME_US  0.8
 #define T1H_TIME_US  0.8
 #define T1L_TIME_US  0.3
-#define RES_TIME_US  200
+#define RES_TIME_US  50
 
 static size_t
 rmt_encode_led_strip(rmt_encoder_t *encoder, rmt_channel_handle_t channel, const void *primary_data, size_t data_size,
